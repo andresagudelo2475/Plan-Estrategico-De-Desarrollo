@@ -3,38 +3,39 @@
 import React from 'react';
 
 interface KPICardProps {
-    title: string;
-    value: string | number;
-    subtitle?: string;
-    icon?: React.ReactNode;
-    trend?: 'up' | 'down';
-    trendValue?: string;
-    color?: string;
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  icon?: React.ReactNode;
+  trend?: 'up' | 'down';
+  trendValue?: string;
+  color?: string;
 }
 
 const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, trend, trendValue, color }) => {
-    return (
-        <div className="card kpi-card">
-            <div className="kpi-header">
-                <span className="kpi-title">{title}</span>
-                {icon && <div className="kpi-icon" style={{ color }}>{icon}</div>}
-            </div>
-            <div className="kpi-body">
-                <h3 className="kpi-value">{value}</h3>
-                {trend && (
-                    <div className={`kpi-trend ${trend}`}>
-                        {trend === 'up' ? '▲' : '▼'} {trendValue}
-                    </div>
-                )}
-            </div>
-            {subtitle && <div className="kpi-subtitle">{subtitle}</div>}
+  return (
+    <div className="card kpi-card">
+      <div className="kpi-header">
+        <span className="kpi-title">{title}</span>
+        {icon && <div className="kpi-icon" style={{ color }}>{icon}</div>}
+      </div>
+      <div className="kpi-body">
+        <h3 className="kpi-value">{value}</h3>
+        {trend && (
+          <div className={`kpi-trend ${trend}`}>
+            {trend === 'up' ? '▲' : '▼'} {trendValue}
+          </div>
+        )}
+      </div>
+      {subtitle && <div className="kpi-subtitle">{subtitle}</div>}
 
-            <style jsx>{`
+      <style jsx>{`
         .kpi-card {
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
-          min-width: 200px;
+          min-width: 140px;
+          padding: 1rem !important;
           border-left: 4px solid ${color || 'var(--color-primary-main)'};
         }
 
@@ -45,7 +46,7 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, trend, 
         }
 
         .kpi-title {
-          font-size: 0.85rem;
+          font-size: 0.75rem;
           font-weight: 600;
           color: #666;
           text-transform: uppercase;
@@ -53,10 +54,11 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, trend, 
         }
 
         .kpi-value {
-          font-size: 1.8rem;
+          font-size: 1.5rem;
           font-weight: 800;
           color: var(--color-primary-dark);
-          margin: 0.2rem 0;
+          margin: 0.1rem 0;
+          white-space: nowrap;
         }
 
         .kpi-trend {
@@ -82,8 +84,8 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, subtitle, icon, trend, 
           color: #888;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 export default KPICard;

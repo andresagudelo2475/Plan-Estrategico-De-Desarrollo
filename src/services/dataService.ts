@@ -1,4 +1,4 @@
-import { Initiative, FinancialSummary, FilterState } from './types';
+import { Initiative, FinancialSummary, FilterState, ClientFinancialSummary } from './types';
 
 export const initialFilters: FilterState = {
     client: '',
@@ -110,6 +110,108 @@ export const mockInitiatives: Initiative[] = [
         total_contract_value: 2400000000,
         digital_products: 'Data Warehouse, Mobile App',
         created_at: '2026-01-20 08:00:00',
+    },
+    {
+        id_cxm_strategic_development_plan: 16,
+        id_dp_clientes: 173,
+        initiative_name: 'Transformación Digital Nutresa',
+        general_description: 'Migración a nube y automatización de pedidos',
+        identified_need: 'Escalabilidad del sistema',
+        execution_detail: 'En ejecución',
+        initiative_nature_id: 3,
+        digital_nature: 1,
+        client_strategic_pillar: 'Innovación',
+        visibility_level_id: 20,
+        responsible_company_id: 53,
+        analyst_participation: 1,
+        implementation_analyst_name: 'Daniela Gomez',
+        operational_responsible_konecta: 'Maria Paula Velez',
+        client_responsible: 'Juan Perez',
+        client: 'Nutresa',
+        director: 'Maria Paula Velez',
+        expected_start_date: '2026-02-15',
+        expected_end_date: '2026-11-30',
+        first_impact_indicator: 'Disponibilidad',
+        current_status_first_indicator: 90,
+        goal_first_indicator: '99.9%',
+        current_status_id: 10,
+        current_progress_percentage: 30,
+        expected_progress_percentage: 25,
+        execution_punctuality_id: 57,
+        commercial_margin: 28.0,
+        annual_total_income: 850000000,
+        annual_total_value: 800000000,
+        total_contract_value: 1700000000,
+        digital_products: 'Cloud CRM, Analytics Pro',
+        created_at: '2026-01-25 09:00:00',
+    },
+    {
+        id_cxm_strategic_development_plan: 17,
+        id_dp_clientes: 174,
+        initiative_name: 'Retención de Clientes Tigo',
+        general_description: 'Modelo predictivo de churn',
+        identified_need: 'Alta tasa de cancelación',
+        execution_detail: 'Cerrado / Finalizado',
+        initiative_nature_id: 4,
+        digital_nature: 1,
+        client_strategic_pillar: 'Retención',
+        visibility_level_id: 10,
+        responsible_company_id: 53,
+        analyst_participation: 1,
+        implementation_analyst_name: 'Andres Agudelo',
+        operational_responsible_konecta: 'Jaime Humberto Gallego',
+        client_responsible: 'Luisa Fernanda',
+        client: 'Tigo',
+        director: 'Jaime Humberto Gallego',
+        expected_start_date: '2025-06-01',
+        expected_end_date: '2025-12-31',
+        first_impact_indicator: 'Churn Rate',
+        current_status_first_indicator: 12,
+        goal_first_indicator: '8%',
+        current_status_id: 14,
+        current_progress_percentage: 100,
+        expected_progress_percentage: 100,
+        execution_punctuality_id: 57,
+        commercial_margin: 22.0,
+        annual_total_income: 600000000,
+        annual_total_value: 600000000,
+        total_contract_value: 600000000,
+        digital_products: 'Analytics Pro',
+        created_at: '2025-05-15 10:00:00',
+    },
+    {
+        id_cxm_strategic_development_plan: 18,
+        id_dp_clientes: 171,
+        initiative_name: 'Auto-gestión Sura',
+        general_description: 'Bot de WhatsApp para trámites rápidos',
+        identified_need: 'Saturación de líneas telefónicas',
+        execution_detail: 'En ejecución',
+        initiative_nature_id: 2,
+        digital_nature: 1,
+        client_strategic_pillar: 'Eficiencia',
+        visibility_level_id: 30,
+        responsible_company_id: 53,
+        analyst_participation: 1,
+        implementation_analyst_name: 'Carolina Ruiz',
+        operational_responsible_konecta: 'Jaime Humberto Gallego',
+        client_responsible: 'BiBiana Patricia Mira',
+        client: 'Sura Panamá',
+        director: 'Jaime Humberto Gallego',
+        expected_start_date: '2026-01-10',
+        expected_end_date: '2026-08-30',
+        first_impact_indicator: 'FCR',
+        current_status_first_indicator: 60,
+        goal_first_indicator: '75%',
+        current_status_id: 10,
+        current_progress_percentage: 45,
+        expected_progress_percentage: 40,
+        execution_punctuality_id: 57,
+        commercial_margin: 30.5,
+        annual_total_income: 450000000,
+        annual_total_value: 400000000,
+        total_contract_value: 900000000,
+        digital_products: 'Omnichannel, Cloud CRM',
+        created_at: '2026-01-05 11:00:00',
     }
 ];
 
@@ -138,6 +240,31 @@ export const calculateFinancials = (data: Initiative[]): FinancialSummary => {
         : 0;
 
     return { ity, tav, tcv, mc: weightedMC };
+};
+
+export const calculateFinancialsByClient = (data: Initiative[]): ClientFinancialSummary[] => {
+    const clients: Record<string, { ity: number, tav: number, tcv: number, mcAcc: number, count: number }> = {};
+
+    data.forEach(item => {
+        const client = item.client || 'Sin Cliente';
+        if (!clients[client]) {
+            clients[client] = { ity: 0, tav: 0, tcv: 0, mcAcc: 0, count: 0 };
+        }
+        clients[client].ity += item.annual_total_income;
+        clients[client].tav += item.annual_total_value;
+        clients[client].tcv += item.total_contract_value;
+        clients[client].mcAcc += (item.commercial_margin * item.total_contract_value);
+        clients[client].count += 1;
+    });
+
+    return Object.entries(clients).map(([name, stats]) => ({
+        client: name,
+        ity: stats.ity,
+        tav: stats.tav,
+        tcv: stats.tcv,
+        mc: stats.tcv > 0 ? stats.mcAcc / stats.tcv : 0,
+        count: stats.count
+    })).sort((a, b) => b.tcv - a.tcv);
 };
 
 export const getDigitalProductsCount = (data: Initiative[]): Record<string, number> => {

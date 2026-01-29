@@ -40,6 +40,15 @@ export interface FinancialSummary {
     mc: number; // Weighted average margin
 }
 
+export interface ClientFinancialSummary {
+    client: string;
+    ity: number;
+    tav: number;
+    tcv: number;
+    mc: number;
+    count: number;
+}
+
 export interface FilterState {
     client: string;
     manager: string;
