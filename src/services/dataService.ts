@@ -2,10 +2,13 @@ import { Initiative, FinancialSummary, FilterState, ClientFinancialSummary } fro
 
 export const initialFilters: FilterState = {
     client: '',
+    director: '',
     manager: '',
     isDigital: 'Todos',
     status: 'Todos',
     digitalProduct: '',
+    createdAt: '',
+    expectedStartDate: '',
 };
 
 export const mockInitiatives: Initiative[] = [
@@ -42,6 +45,9 @@ export const mockInitiatives: Initiative[] = [
         total_contract_value: 541439000,
         digital_products: '',
         created_at: '2026-01-26 07:59:34',
+        origin: 'Planeación',
+        konecta_strategic_pillar: 'Excelencia Operativa',
+        visibility_level: 'Interno',
     },
     {
         id_cxm_strategic_development_plan: 14,
@@ -76,6 +82,9 @@ export const mockInitiatives: Initiative[] = [
         total_contract_value: 384026000,
         digital_products: 'Cloud CRM, Analytics Pro',
         created_at: '2026-01-26 07:59:34',
+        origin: 'Ciclos de Innovación',
+        konecta_strategic_pillar: 'CX',
+        visibility_level: 'Externo',
     },
     {
         id_cxm_strategic_development_plan: 15,
@@ -110,6 +119,9 @@ export const mockInitiatives: Initiative[] = [
         total_contract_value: 2400000000,
         digital_products: 'Data Warehouse, Mobile App',
         created_at: '2026-01-20 08:00:00',
+        origin: 'Planeación',
+        konecta_strategic_pillar: 'Eficiencia',
+        visibility_level: 'Interno',
     },
     {
         id_cxm_strategic_development_plan: 16,
@@ -144,6 +156,9 @@ export const mockInitiatives: Initiative[] = [
         total_contract_value: 1700000000,
         digital_products: 'Cloud CRM, Analytics Pro',
         created_at: '2026-01-25 09:00:00',
+        origin: 'Comercial',
+        konecta_strategic_pillar: 'Digitalización',
+        visibility_level: 'Externo',
     },
     {
         id_cxm_strategic_development_plan: 17,
@@ -178,6 +193,9 @@ export const mockInitiatives: Initiative[] = [
         total_contract_value: 600000000,
         digital_products: 'Analytics Pro',
         created_at: '2025-05-15 10:00:00',
+        origin: 'Células de Desarrollo',
+        konecta_strategic_pillar: 'Retención',
+        visibility_level: 'Interno',
     },
     {
         id_cxm_strategic_development_plan: 18,
@@ -212,17 +230,26 @@ export const mockInitiatives: Initiative[] = [
         total_contract_value: 900000000,
         digital_products: 'Omnichannel, Cloud CRM',
         created_at: '2026-01-05 11:00:00',
+        origin: 'Ciclos de Innovación',
+        konecta_strategic_pillar: 'CX',
+        visibility_level: 'Externo',
     }
 ];
 
 export const filterInitiatives = (data: Initiative[], filters: FilterState): Initiative[] => {
     return data.filter(item => {
         if (filters.client && item.client !== filters.client) return false;
-        if (filters.manager && item.director !== filters.manager) return false;
+        if (filters.director && item.director !== filters.director) return false;
+        if (filters.manager && item.operational_responsible_konecta !== filters.manager) return false;
         if (filters.isDigital === 'Sí' && item.digital_nature !== 1) return false;
         if (filters.isDigital === 'No' && item.digital_nature !== 0) return false;
         if (filters.status !== 'Todos' && String(item.current_status_id) !== filters.status) return false;
         if (filters.digitalProduct && (!item.digital_products || !item.digital_products.includes(filters.digitalProduct))) return false;
+
+        // Date filters
+        if (filters.createdAt && !item.created_at.includes(filters.createdAt)) return false;
+        if (filters.expectedStartDate && !item.expected_start_date.includes(filters.expectedStartDate)) return false;
+
         return true;
     });
 };

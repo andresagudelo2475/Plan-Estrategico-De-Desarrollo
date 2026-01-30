@@ -105,7 +105,7 @@ export default function Dashboard() {
         if (natureTableDigitalFilter === 'Digital') data = data.filter(i => i.digital_nature === 1);
         if (natureTableDigitalFilter === 'No Digital') data = data.filter(i => i.digital_nature === 0);
 
-        const counts: Record<string, Record<string, number>> = {};
+        const counts: Record<string, number> = {};
         const natureMap: Record<number, string> = {
             1: 'Crecimiento',
             2: 'Eficiencia',
@@ -116,31 +116,39 @@ export default function Dashboard() {
         data.forEach(item => {
             const client = item.client || 'Sin Cliente';
             const nature = natureMap[item.initiative_nature_id] || 'Otro';
-            if (!counts[client]) counts[client] = {};
-            counts[client][nature] = (counts[client][nature] || 0) + 1;
+            const origin = item.origin || 'N/A';
+            const pillar = item.konecta_strategic_pillar || 'N/A';
+            const visibility = item.visibility_level || 'N/A';
+
+            const key = `${client}|${nature}|${origin}|${pillar}|${visibility}`;
+            counts[key] = (counts[key] || 0) + 1;
         });
 
-        const result: { client: string, nature: string, count: number }[] = [];
-        Object.entries(counts).forEach(([client, natures]) => {
-            Object.entries(natures).forEach(([nature, count]) => {
-                result.push({ client, nature, count });
-            });
+        const result = Object.entries(counts).map(([key, count]) => {
+            const [client, nature, origin, pillar, visibility] = key.split('|');
+            return { client, nature, origin, pillar, visibility, count };
         });
         return result.sort((a, b) => b.count - a.count);
     }, [filteredData, natureTableDigitalFilter]);
 
     const filterOptions = useMemo(() => ({
-        clients: Array.from(new Set(mockInitiatives.map(i => i.client))),
-        managers: Array.from(new Set(mockInitiatives.map(i => i.director))),
+        clients: Array.from(new Set(mockInitiatives.map(i => i.client))).sort(),
+        directors: Array.from(new Set(mockInitiatives.map(i => i.director))).sort(),
+        managers: Array.from(new Set(mockInitiatives.map(i => i.operational_responsible_konecta))).sort(),
+        creationDates: Array.from(new Set(mockInitiatives.map(i => i.created_at.split(' ')[0]))).sort().reverse(),
+        startDates: Array.from(new Set(mockInitiatives.map(i => i.expected_start_date))).sort().reverse(),
     }), []);
 
     const activeFiltersCount = useMemo(() => {
         let count = 0;
         if (filters.client) count++;
+        if (filters.director) count++;
         if (filters.manager) count++;
         if (filters.isDigital !== 'Todos') count++;
         if (filters.status !== 'Todos') count++;
         if (filters.digitalProduct) count++;
+        if (filters.createdAt) count++;
+        if (filters.expectedStartDate) count++;
         return count;
     }, [filters]);
 
@@ -188,7 +196,7 @@ export default function Dashboard() {
                 <div className="integrated-header-content">
                     <div className="logo-text" style={{ fontSize: '1.5rem', fontWeight: 900 }}>Plan Estrategico de Desarrollo</div>
                     <div className="header-actions">
-                        {(filters.client || filters.manager || filters.status !== 'Todos' || filters.digitalProduct) && (
+                        {activeFiltersCount > 0 && (
                             <button className="premium-btn text-only" onClick={() => setFilters(initialFilters)}>
                                 Limpiar Filtros
                             </button>
@@ -302,7 +310,7 @@ export default function Dashboard() {
                                         <tbody>
                                             {chartData.map((item, idx) => (
                                                 <tr key={idx} onClick={() => {
-                                                    const field = quantityDimension === 'client' ? 'client' : 'manager';
+                                                    const field = quantityDimension === 'client' ? 'client' : 'director';
                                                     setFilters(prev => ({ ...prev, [field]: item.name }));
                                                 }} style={{ cursor: 'pointer' }}>
                                                     <td style={{ fontWeight: 600 }}>{item.name}</td>
@@ -324,8 +332,8 @@ export default function Dashboard() {
                                             data={chartData}
                                             onClick={(data) => {
                                                 if (data && data.activeLabel) {
-                                                    const field = quantityDimension === 'client' ? 'client' : 'manager';
-                                                    setFilters(prev => ({ ...prev, [field]: data.activeLabel }));
+                                                    const field = quantityDimension === 'client' ? 'client' : 'director';
+                                                    setFilters(prev => ({ ...prev, [field]: String(data.activeLabel) }));
                                                 }
                                             }}
                                             style={{ cursor: 'pointer' }}
@@ -470,25 +478,31 @@ export default function Dashboard() {
                                     <button className={natureTableDigitalFilter === 'No Digital' ? 'active' : ''} onClick={() => setNatureTableDigitalFilter('No Digital')}>No Digital</button>
                                 </div>
                             </div>
-                            <div className="table-zone-small" style={{ height: '220px', overflowY: 'auto' }}>
+                            <div className="table-zone-small" style={{ height: '220px', overflowY: 'auto', overflowX: 'auto' }}>
                                 <table className="compact-detail-table">
                                     <thead>
                                         <tr>
                                             <th>Cliente</th>
                                             <th>Naturaleza</th>
+                                            <th>Origen</th>
+                                            <th>Pilar Konecta</th>
+                                            <th>Visibilidad</th>
                                             <th style={{ textAlign: 'center' }}>Cuenta</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {natureData.map((item, idx) => (
+                                        {natureData.map((item: any, idx) => (
                                             <tr key={idx}>
                                                 <td style={{ fontWeight: 600 }}>{item.client}</td>
                                                 <td>{item.nature}</td>
+                                                <td>{item.origin}</td>
+                                                <td>{item.pillar}</td>
+                                                <td>{item.visibility}</td>
                                                 <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--color-primary-main)' }}>{item.count}</td>
                                             </tr>
                                         ))}
                                         {natureData.length === 0 && (
-                                            <tr><td colSpan={3} style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>No hay datos disponibles</td></tr>
+                                            <tr><td colSpan={6} style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>No hay datos disponibles</td></tr>
                                         )}
                                     </tbody>
                                 </table>
@@ -561,6 +575,9 @@ export default function Dashboard() {
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #edf2f7', textAlign: 'left' }}>
                                         <th style={{ padding: '1rem', fontSize: '0.8rem', color: '#666' }}>Iniciativa</th>
+                                        <th style={{ padding: '1rem', fontSize: '0.8rem', color: '#666' }}>Origen</th>
+                                        <th style={{ padding: '1rem', fontSize: '0.8rem', color: '#666' }}>Pilar Konecta</th>
+                                        <th style={{ padding: '1rem', fontSize: '0.8rem', color: '#666' }}>Visibilidad</th>
                                         <th style={{ padding: '1rem', fontSize: '0.8rem', color: '#666' }}>Primer Impacto</th>
                                         <th style={{ padding: '1rem', fontSize: '0.8rem', color: '#666' }}>Director</th>
                                         <th style={{ padding: '1rem', fontSize: '0.8rem', color: '#666' }}>Estado</th>
@@ -575,6 +592,9 @@ export default function Dashboard() {
                                                 <div style={{ fontWeight: 700, color: '#2d3748' }}>{item.initiative_name}</div>
                                                 <div style={{ fontSize: '0.7rem', color: '#a0aec0' }}>{item.client}</div>
                                             </td>
+                                            <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{item.origin}</td>
+                                            <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{item.konecta_strategic_pillar}</td>
+                                            <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{item.visibility_level}</td>
                                             <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{item.first_impact_indicator}</td>
                                             <td style={{ padding: '1rem', fontSize: '0.85rem', fontWeight: 600 }}>{item.director}</td>
                                             <td style={{ padding: '1rem' }}>

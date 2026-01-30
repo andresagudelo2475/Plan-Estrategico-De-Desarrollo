@@ -31,6 +31,9 @@ export interface Initiative {
     total_contract_value: number; // TCV
     digital_products: string; // Comma separated list of products
     created_at: string;
+    origin: string;
+    konecta_strategic_pillar: string;
+    visibility_level: string;
 }
 
 export interface FinancialSummary {
@@ -51,8 +54,11 @@ export interface ClientFinancialSummary {
 
 export interface FilterState {
     client: string;
+    director: string;
     manager: string;
     isDigital: 'Todos' | 'Sí' | 'No';
     status: string;
-    digitalProduct: string; // New field for interactive filtering
+    digitalProduct: string;
+    createdAt: string;
+    expectedStartDate: string;
 }

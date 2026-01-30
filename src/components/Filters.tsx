@@ -8,7 +8,10 @@ interface FiltersProps {
     onChange: (filters: FilterState) => void;
     options: {
         clients: string[];
+        directors: string[];
         managers: string[];
+        creationDates: string[];
+        startDates: string[];
     };
 }
 
@@ -28,7 +31,15 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange, options }) => {
             </div>
 
             <div className="filter-group">
-                <label>Responsable</label>
+                <label>Director</label>
+                <select value={filters.director} onChange={(e) => handleChange('director', e.target.value)}>
+                    <option value="">Todos</option>
+                    {options.directors.map(d => d && <option key={d} value={d}>{d}</option>)}
+                </select>
+            </div>
+
+            <div className="filter-group">
+                <label>Gerente</label>
                 <select value={filters.manager} onChange={(e) => handleChange('manager', e.target.value)}>
                     <option value="">Todos</option>
                     {options.managers.map(m => m && <option key={m} value={m}>{m}</option>)}
@@ -48,10 +59,27 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange, options }) => {
                 <label>Estado</label>
                 <select value={filters.status} onChange={(e) => handleChange('status', e.target.value)}>
                     <option value="Todos">Todos</option>
-                    <option value="En Curso">En Curso</option>
-                    <option value="Cerrada">Cerrada</option>
-                    <option value="Pendiente">Pendiente</option>
+                    <option value="10">En Curso</option>
+                    <option value="14">Aceptado por Cliente</option>
                 </select>
+            </div>
+
+            <div className="filter-group">
+                <label>Fecha Creación</label>
+                <input
+                    type="date"
+                    value={filters.createdAt}
+                    onChange={(e) => handleChange('createdAt', e.target.value)}
+                />
+            </div>
+
+            <div className="filter-group">
+                <label>Inicio Esperado</label>
+                <input
+                    type="date"
+                    value={filters.expectedStartDate}
+                    onChange={(e) => handleChange('expectedStartDate', e.target.value)}
+                />
             </div>
 
             <style jsx>{`
@@ -78,7 +106,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange, options }) => {
           text-transform: uppercase;
         }
 
-        select {
+        select, input[type="date"] {
           padding: 10px;
           border: 1px solid #ddd;
           border-radius: var(--border-radius-md);
@@ -87,9 +115,10 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange, options }) => {
           color: var(--color-black);
           outline: none;
           transition: border-color 0.2s;
+          font-family: inherit;
         }
 
-        select:focus {
+        select:focus, input[type="date"]:focus {
           border-color: var(--color-primary-main);
         }
       `}</style>
